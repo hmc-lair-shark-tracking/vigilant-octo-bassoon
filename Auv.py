@@ -75,7 +75,7 @@ class Auv:
         Return:
             dictionary, representing the communication message sent from the auv
         """
-        shark_state_list = self.calculate_shark_state(shark_measurements)
+        shark_state_list = self.calc_shark_state(shark_measurements)
         shark_state_estimates, shark_estate_estimation_err = self.particle_filter.estimate_shark_state(
                                                                     self.state, 
                                                                     shark_state_list, 
@@ -136,7 +136,7 @@ class Auv:
 
         waypoint = self.find_waypoint_to_track(auv_trajectory, new_trajectory, curr_time)
 
-        angle_to_traj_point = math.atan2(self.state.x - self.state.y, way_point.x - self.state.x) 
+        angle_to_traj_point = math.atan2(self.state.x - self.state.y, waypoint.x - self.state.x) 
 
         self.state.w = K_P * angle_wrap(angle_to_traj_point - self.state.theta) #proportional control
         
@@ -203,6 +203,9 @@ class Auv:
                 "auv_state": MotionPlanState object, which represents the current state of the auv
                 "shark_est": Python list, [x_estimated_shark, y_estimated_shark]
                 "auv_trajectory": Python list, list of trajectory points from the auv planner
+            TODO: 
+                add type of planner
+                what the planner is planning for
         """
         msg = {
             "auv_state": self.state, 
