@@ -14,6 +14,7 @@ class RRT:
         self.start = auv_comm_msgs["start"] # MPS type
         self.velocity = auv_comm_msgs["velocity"]
         self.plantime = auv_comm_msgs["plan_time"]
+        self.goal = auv_comm_msgs["goal"]
         
         self.path = []
         # TODO: mps_list => path
@@ -178,6 +179,47 @@ class RRT:
         #new_node.parent = from_node
         new_mps.path[0] = mps
 
+        return new_mps
+
+    def connect_to_goal_curve_alt(self, mps, exp_rate):
+        new_mps = Motion_plan_state(mps.x, mps.y, theta=mps.theta, traj_time_stamp=mps.traj_time_stamp)
+        theta_0 = new_mps.theta
+        _, theta = self.get_distance_angle(mps, self.goal)
+        diff = theta - theta_0
+        diff = self.angle_wrap(diff)
+        if abs(diff) > math.pi / 2:
+            return
+
+        #polar coordinate
+        r_G = math.hypot(self.goal.x - new_mps.x, self.goal.y - new_mps.y)
+        phi_G = math.atan2(self.goal.y - new_mps.y, self.goal.x - new_mps.x)
+
+        #arc
+        phi = 2 * self.angle_wrap(phi_G - new_mps.theta)
+        radius = r_G / (2 * math.sin(phi_G - new_mps.theta))
+
+        length = radius * phi
+        if phi > math.pi:
+            phi -= 2 * math.pi
+            length = -radius * phi
+        elif phi < -math.pi:
+            phi += 2 * math.pi
+            length = -radius * phi
+        new_mps.length += length
+
+        ang_vel = phi / (length / exp_rate)
+
+        #center of rotation
+        x_C = new_mps.x - radius * math.sin(new_mps.theta)
+        y_C = new_mps.y + radius * math.cos(new_mps.theta)
+
+        n_expand = math.floor(length / exp_rate)
+        for i in range(n_expand+1):
+            new_mps.x = x_C + radius * math.sin(ang_vel * i + theta_0)
+            new_mps.y = y_C - radius * math.cos(ang_vel * i + theta_0)
+            new_mps.theta = ang_vel * i + theta_0
+            new_mps.path.append(Motion_plan_state(new_mps.x, new_mps.y, theta = new_mps.theta, plan_time_stamp=time.time()-self.t_start))
+        
         return new_mps
 
     def rrt(self):
