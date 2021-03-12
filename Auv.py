@@ -216,7 +216,6 @@ class Auv:
         return msg
                
 
-
 class MotionPlanState:
     # class for motion planning
     def __init__(self, x, y, z, theta=0, v=0, w=0):
