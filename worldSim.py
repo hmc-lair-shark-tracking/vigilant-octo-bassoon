@@ -16,12 +16,15 @@ import catalina
 
 class WorldSim:
 
-    def __init__(self, time_to_run, historical_data_set):
+    def __init__(self, time_to_run, historical_data_set, initial_auv_states, obstacles, boundaries, habitats):
         self.MAX_TIME_TO_RUN = time_to_run
-        self.auv_list = createAuvList() #What should I do for this?
-        self.shark_list = createSharkList() #What should I do for this?
+        self.auv_list = createAuvList(initial_auv_states) #What should I do for this?
+        self.shark_list = createSharkList(historical_data_set) #What should I do for this?
         self.historical_data_set = historical_data_set
         self.auv_comm_msgs = [] #What should I do for this?
+        self.obstacles = obstacles
+        self.boundaries = boundaries
+        self.habitats = habitats
 
     def runMainLoop(self):
         """
@@ -41,7 +44,7 @@ class WorldSim:
         """
         auv_list = []
         for state in initial_states:
-            auv = createAuv(initial_states) #Need to reference our AUV file
+            auv = createAuv(state) #Need to reference our AUV file
             auv_list.append(auv)
         
         return auv_list
@@ -55,7 +58,7 @@ class WorldSim:
         """
         shark_list = []
         for state in initial_states:
-            shark = createShark(initial_states) #Need to reference our AUV file
+            shark = createShark(initial_states) #Need to reference our Shark file
             shark_list.append(shark)
         
         return shark_list
