@@ -75,6 +75,5 @@ def RunControlLoop(t, shark_measurements, auv_comm_msgs):
     update_state(control_signals)
     return new_msg(auv_state, shark_measurements, auv_trajectory(s))
 
-
 if __name__ == '__main__':
-    main()
+    RunMainLoop()
