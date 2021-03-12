@@ -1,6 +1,7 @@
 from ParticleFilter import ParticleFilter
 from MotionPlanner import MotionPlanner
 import math
+import numpy as np
 
 def angle_wrap(ang):
     """
@@ -87,7 +88,7 @@ class Auv:
         return self.create_auv_msg(shark_state_estimates, auv_trajectory)
 
 
-    def calc_shark_state(shark_measurements):
+    def calc_shark_state(self, shark_measurements):
         """
         Based on the shark_measurements, calculate additional shark information (related to the auv position)
             which would get used in particle filter
@@ -110,7 +111,7 @@ class Auv:
             # added with Gaussian noise with 0 mean and standard deviation of 0.5
             z_shark_bearing = angle_wrap(math.atan2(delta_y, delta_x) - self.state.theta + np.random.normal(0, 0.5))
 
-            shark_state_list.append([shark.x, shark.y, z_shark_range, z_shark_range, shark.id])
+            shark_state_list.append([shark.x, shark.y, z_shark_range, z_shark_bearing, shark.id])
 
         return shark_state_list
 
