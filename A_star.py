@@ -6,8 +6,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from shapely.wkt import loads as load_wkt
-from motion_plan_state import Motion_plan_state
 from shapely.geometry import Polygon
+
+class MotionPlanState:
+    # TODO: currently using for debugging, remove 
+    # class for motion planning
+    def __init__(self, x, y, z=0, theta=0, v=0, w=0):
+        self.x = x
+        self.y = y
+        self.z = z
+        self.theta = theta
+        self.v = v  # linear velocity
+        self.w = w  # angular velocity
 
 class Node:
     def __init__(self, time_step, dist_traveled, parent=None, position=None):
@@ -204,7 +214,7 @@ class astar:
                     current = current.parent
                 path_mps = [] 
                 for point in self.path:
-                    path_mps.append(Motion_plan_state(point[0], point[1]))
+                    path_mps.append(MotionPlanState(point[0], point[1]))
                 trajectory = path_mps[::-1]
                 return trajectory
 

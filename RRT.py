@@ -4,7 +4,17 @@ import time
 import csv
 import numpy as np
 from shapely.geometry import Polygon, Point
-from motion_plan_state import Motion_plan_state
+
+class MotionPlanState:
+    # TODO: currently using for debugging, remove 
+    # class for motion planning
+    def __init__(self, x, y, z=0, theta=0, v=0, w=0):
+        self.x = x
+        self.y = y
+        self.z = z
+        self.theta = theta
+        self.v = v  # linear velocity
+        self.w = w  # angular velocity
 
 class RRT:
     def __init__(self, env_info):
@@ -107,7 +117,7 @@ class RRT:
         ran_y = random.uniform(y_min, y_max)
         ran_theta = random.uniform(-math.pi, math.pi)
         ran_size = random.uniform(0, size_max)
-        mps = Motion_plan_state(ran_x, ran_y, theta=ran_theta, size=ran_size)
+        mps = MotionPlanState(ran_x, ran_y, theta=ran_theta, size=ran_size)
         #ran_z = random.uniform(self.min_area.z, self.max_area.z)
         
         return mps
@@ -139,7 +149,7 @@ class RRT:
         dubins_path = new_mps.path
         new_mps = dubins_path[-2]
         new_mps.path = dubins_path'''
-        new_mps = Motion_plan_state(mps.x, mps.y, theta = mps.theta, plan_time_stamp=time.time()-self.t_start, traj_time_stamp=mps.traj_time_stamp, length=mps.length)
+        new_mps = MotionPlanState(mps.x, mps.y, theta = mps.theta, plan_time_stamp=time.time()-self.t_start, traj_time_stamp=mps.traj_time_stamp, length=mps.length)
 
         new_mps.path = [mps]
 
@@ -171,7 +181,7 @@ class RRT:
                 new_mps.traj_time_stamp += movement / velocity_temp
                 new_mps.length += movement
                 if movement >= min_dist:
-                    new_mps.path.append(Motion_plan_state(new_mps.x, new_mps.y, v=velocity_temp, theta=new_mps.theta, traj_time_stamp=new_mps.traj_time_stamp, plan_time_stamp=time.time()-self.t_start, length=new_mps.length))
+                    new_mps.path.append(MotionPlanState(new_mps.x, new_mps.y, v=velocity_temp, theta=new_mps.theta, traj_time_stamp=new_mps.traj_time_stamp, plan_time_stamp=time.time()-self.t_start, length=new_mps.length))
 
             #d, theta = self.get_distance_angle(new_mps, to_mps)
 
@@ -185,7 +195,7 @@ class RRT:
         return new_mps
 
     def connect_to_goal_curve_alt(self, mps, exp_rate, goal):
-        new_mps = Motion_plan_state(mps.x, mps.y, theta=mps.theta, traj_time_stamp=mps.traj_time_stamp)
+        new_mps = MotionPlanState(mps.x, mps.y, theta=mps.theta, traj_time_stamp=mps.traj_time_stamp)
         theta_0 = new_mps.theta
         _, theta = self.get_distance_angle(mps, goal)
         diff = theta - theta_0
@@ -221,7 +231,7 @@ class RRT:
             new_mps.x = x_C + radius * math.sin(ang_vel * i + theta_0)
             new_mps.y = y_C - radius * math.cos(ang_vel * i + theta_0)
             new_mps.theta = ang_vel * i + theta_0
-            new_mps.path.append(Motion_plan_state(new_mps.x, new_mps.y, theta = new_mps.theta, plan_time_stamp=time.time()-self.t_start))
+            new_mps.path.append(MotionPlanState(new_mps.x, new_mps.y, theta = new_mps.theta, plan_time_stamp=time.time()-self.t_start))
         
         return new_mps
 
