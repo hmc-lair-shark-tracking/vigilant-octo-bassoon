@@ -165,7 +165,7 @@ class astar:
             i += 1 # Update index
         return i+1 # The number of habitats within range R
 
-    def plan_trajectory(self, auv_comm_msgs): 
+    def plan_trajectory(self, shark_state_estimates, auv_comm_msgs): 
         """
         Find the optimal path from start to goal avoiding given obstacles
 

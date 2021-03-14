@@ -18,7 +18,7 @@ class MotionPlanner:
             self.motion_planner == RRT(env_info)
         self.env_info = env_info
 
-    def plan_trajectory(self, auv_comm_msgs):
+    def plan_trajectory(self, shark_state_estimates, auv_comm_msgs):
         
         """
         Return the trajectory planned by the specified planner
@@ -26,6 +26,6 @@ class MotionPlanner:
         Parameter:
             auv_comm_msgs - Python list of dictionaries, representing the information sent by other auvs
         """
-        return self.motion_planner.plan_trajectory(auv_comm_msgs)
+        return self.motion_planner.plan_trajectory(shark_state_estimates, auv_comm_msgs)
 
 

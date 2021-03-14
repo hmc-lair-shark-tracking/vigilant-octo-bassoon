@@ -225,7 +225,7 @@ class RRT:
         
         return new_mps
 
-    def plan_trajectory(self, auv_comm_msgs):
+    def plan_trajectory(self, shark_state_estimates, auv_comm_msgs):
         """
         rrt path planning
         animation: flag for animation on or off
