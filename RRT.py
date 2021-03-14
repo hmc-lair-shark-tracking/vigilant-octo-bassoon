@@ -7,17 +7,20 @@ from shapely.geometry import Polygon, Point
 from motion_plan_state import Motion_plan_state
 
 class RRT:
-    def __init__(self, env_info, auv_comm_msgs):
+    def __init__(self, env_info):
+        """
+        Initialize RRT class given AUV common messages and environmental information
+
+        Parameters:
+            auv_comm_msgs - Python dictionary, certain information about the AUV
+                (e.g. start, goal, plantime)
+            env_info - Python dictionary, contain information neccessary for the planner
+                (e.g. boundary, obstacles, habitats)
+        """
         self.boundary_poly = env_info["boundary"]
         self.obstacle_list = env_info["obstacles"]
         self.habitats = env_info["habitats"]
-        self.start = auv_comm_msgs["start"] # MPS type
-        self.velocity = auv_comm_msgs["velocity"]
-        self.plantime = auv_comm_msgs["plan_time"]
-        self.goal = auv_comm_msgs["goal"]
-        
         self.path = []
-        # TODO: mps_list => path
         self.time_bin = {}
 
         # Returned if minimum path length is not achieved within maximum iteration
@@ -181,18 +184,18 @@ class RRT:
 
         return new_mps
 
-    def connect_to_goal_curve_alt(self, mps, exp_rate):
+    def connect_to_goal_curve_alt(self, mps, exp_rate, goal):
         new_mps = Motion_plan_state(mps.x, mps.y, theta=mps.theta, traj_time_stamp=mps.traj_time_stamp)
         theta_0 = new_mps.theta
-        _, theta = self.get_distance_angle(mps, self.goal)
+        _, theta = self.get_distance_angle(mps, goal)
         diff = theta - theta_0
         diff = self.angle_wrap(diff)
         if abs(diff) > math.pi / 2:
             return
 
         #polar coordinate
-        r_G = math.hypot(self.goal.x - new_mps.x, self.goal.y - new_mps.y)
-        phi_G = math.atan2(self.goal.y - new_mps.y, self.goal.x - new_mps.x)
+        r_G = math.hypot(goal.x - new_mps.x, goal.y - new_mps.y)
+        phi_G = math.atan2(goal.y - new_mps.y, goal.x - new_mps.x)
 
         #arc
         phi = 2 * self.angle_wrap(phi_G - new_mps.theta)
@@ -222,25 +225,28 @@ class RRT:
         
         return new_mps
 
-    def rrt(self):
+    def plan_trajectory(self, auv_comm_msgs):
         """
         rrt path planning
         animation: flag for animation on or off
         """
         bin_interval = 5
-        max_plan_time = self.plantime
+        max_plan_time = auv_comm_msgs["plan_time"]
+        velocity = auv_comm_msgs["velocity"]
+        start = auv_comm_msgs["start"] # MPS type
+        goal = auv_comm_msgs["goal"]
         max_traj_time = 200.0
         plan_time = True
         traj_time_stamp = False 
 
-        self.mps_list = [self.start]
+        self.mps_list = [start]
         self.t_start = time.time()
         t_end = time.time() + max_plan_time
         if traj_time_stamp:
             time_expand = math.ceil(max_traj_time / bin_interval)
             for i in range(1, time_expand + 1):
                 self.time_bin[bin_interval * i] = []
-            self.time_bin[bin_interval].append(self.start)
+            self.time_bin[bin_interval].append(start)
         while time.time()<t_end:
             #find the closest motion_plan_state by generating a random time stamp and 
             #find the motion_plan_state whose time stamp is closest to it
@@ -264,7 +270,7 @@ class RRT:
                 if closest_mps.traj_time_stamp > max_traj_time:
                     continue
             
-            new_mps = self.steer(closest_mps, self.dist_to_end, self.diff_max, self.freq, self.velocity, traj_time_stamp)
+            new_mps = self.steer(closest_mps, self.dist_to_end, self.diff_max, self.freq, velocity, traj_time_stamp)
             if self.check_collision(new_mps, self.obstacle_list):
                 print(new_mps)
                 new_mps.parent = closest_mps
@@ -277,7 +283,7 @@ class RRT:
                         self.time_bin[curr_bin] = []
                     self.time_bin[curr_bin].append(new_mps)
                 
-            final_mps = self.connect_to_goal_curve_alt(self.mps_list[-1], self.exp_rate)
+            final_mps = self.connect_to_goal_curve_alt(self.mps_list[-1], self.exp_rate, goal)
             if self.check_collision(final_mps, self.obstacle_list):
                 final_mps.parent = self.mps_list[-1]
                 path = self.generate_final_course(final_mps)

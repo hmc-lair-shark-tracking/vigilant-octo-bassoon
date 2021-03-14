@@ -11,6 +11,15 @@ from shapely.geometry import Polygon
 
 class Node:
     def __init__(self, time_step, dist_traveled, parent=None, position=None):
+        """
+        Initialize a Node class to build an astar class
+
+        Parameters:
+            time_step - Integer type, current time step
+            dist_traveled - Numerical type, length of the current trajectory
+            parent - Node object type, parent node
+            position - Tuple type, position in cartesian coordinates of the current node
+        """
         self.parent = parent
         self.position = position
 
@@ -21,25 +30,29 @@ class Node:
         self.dist_traveled = dist_traveled
 
 class astar:
-    def __init__(self, env_info, auv_comm_msgs):
+    def __init__(self, env_info):
+        """
+        Initialize an astar class
+
+        Parameters:
+            env_info - Python dictionary, contain information neccessary for the planner
+                (e.g. boundary, obstacles, habitats)
+        """
         self.path = []
-        self.start = auv_comm_msgs["start"] # MPS Type
         self.obstacle_list = env_info["obstacles"]
         self.boundary = env_info["boundary"]
         self.habitat_unexplored = env_info["habitats"]
         self.habitat_explored = []
         self.visited_nodes = []
-        self.velocity = auv_comm_msgs["velocity"]
-        self.plantime = auv_comm_msgs["plan_time"]
 
     def euclidean_dist(self, point1, point2):
         """
         Calculate the distance square between two points
-        Parameter:
+
+        Parameters:
             point1 - a position tuple: (x, y)
             point2 - a position tuple: (x, y)
         """
-
         dx = abs(point1[0]-point2[0])
         dy = abs(point1[1]-point2[1])
 
@@ -48,6 +61,7 @@ class astar:
     def same_side(self, p1, p2, a, b):
         """
         Check if p1 and p2 are on the same side
+        
         Parameters:
             p1, p2, a, b -- a position tuple (x, y)
         
@@ -66,8 +80,10 @@ class astar:
     def point_in_triangle(self, p, a, b, c):
         """
         Check if p is inside the triangle formed by connecting a, b, c
+
         Parameters:
             p, a, b, c -- a position tuple (x, y)
+
         Returns:
             True if p is inside the triangle
             False if p is outside of the triangle
@@ -81,9 +97,11 @@ class astar:
     def within_bounds(self, boundary_list, position):
         """
         Check if the input position is within the boundary defined by the boundary_list
+
         Paramters: 
             boundary_list -- a list of Motion_plan_state objects that define the corners of the ROI
             position -- a position tuple (x, y) 
+
         Returns:
             True if the position is inside the bounds
             False if the position is outside of the bounds
@@ -106,6 +124,7 @@ class astar:
 
         """
         Return a list of position tuples that are close to the current point
+
         Parameter:
             current_node: a Node object 
         """
@@ -125,6 +144,7 @@ class astar:
         Check if the current node covers a habitat (either explored or unexplored);
         then update the habitat_open_list that holds all unexplored habitats
         and update the habitat_closed_list that holds all explored habitats 
+
         Parameter:
             current_node: a Node object 
             habitat_open_list: a list of Motion_plan_state objects
@@ -145,16 +165,20 @@ class astar:
             i += 1 # Update index
         return i+1 # The number of habitats within range R
 
-    def astar(self): 
+    def plan_trajectory(self, auv_comm_msgs): 
         """
-        Find the optimal path from start to goal avoiding given obstacles 
-        Parameter: 
-            obs_lst - a list of motion_plan_state objects that represent obstacles 
-            start - a tuple of two elements: x and y coordinates
-            goal - a tuple of two elements: x and y coordinates
+        Find the optimal path from start to goal avoiding given obstacles
+
+        Parameters: 
+            auv_comm_msgs - Python dictionary, certain information about the AUV
+                (e.g. start, goal, velocity, plantime)
         """
 
-        start_node = Node(0, 0, None, (self.start.x, self.start.y))
+        start = auv_comm_msgs["start"] # MPS Type
+        velocity = auv_comm_msgs["velocity"]
+        plantime = auv_comm_msgs["plan_time"]
+
+        start_node = Node(0, 0, None, (start.x, start.y))
         start_node.g = start_node.h = start_node.f = 0
         open_list = [] # hold neighbors of the expanded nodes
         closed_list = [] # hold all the exapnded nodes
@@ -173,7 +197,7 @@ class astar:
             # Update time_step of the current node
             open_list.pop(current_index)
             closed_list.append(current_node) 
-            if current_node.time_step >= self.plantime: # terminating condition
+            if current_node.time_step >= plantime: # terminating condition
                 current = current_node
                 while current is not None: # backtracking to find the d 
                     self.path.append(current.position)
@@ -190,7 +214,7 @@ class astar:
 
             for neighbor in current_neighbors: # create new node
                 curr_dist = current_node.dist_traveled + self.euclidean_dist(current_pos, neighbor)
-                curr_time_step = int(curr_dist/self.velocity)
+                curr_time_step = int(curr_dist/velocity)
 
                 new_node = Node(curr_time_step, curr_dist, current_node, neighbor) 
                 self.update_habitat_coverage(new_node, self.habitat_unexplored, self.habitat_explored)
@@ -203,7 +227,7 @@ class astar:
                 # The number of habitats already visiteed
                 child.g = len(self.habitat_explored)
                 # The number of unexplored habitats within range
-                child.h = self.num_habitat_within_R(current_node, abs(self.plantime - child.time_step) * self.velocity)
+                child.h = self.num_habitat_within_R(current_node, abs(plantime - child.time_step) * velocity)
                 child.f = child.g + child.h
 
                 # check if child exists in the open list and have bigger g 

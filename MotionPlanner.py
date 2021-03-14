@@ -2,7 +2,7 @@ from RRT import RRT
 from A_star import astar
 
 class MotionPlanner:
-    def __init__(self, planner_key_list, env_info, auv_comm_msgs):
+    def __init__(self, planner_key_list, env_info):
 
         """
         Initialize a MotionPlanner class given the type of planner employed and environmental information
@@ -12,25 +12,20 @@ class MotionPlanner:
             env_info - Python dictionary, contain information neccessary for the planner
                 (e.g. boundary, obstacles, habitats)
         """
-        self.planner_type = planner_key_list[0]
+        if planner_key_list[0] == "astar":
+            self.motion_planner = astar(env_info)
+        elif planner_key_list[0] == "rrt":
+            self.motion_planner == RRT(env_info)
         self.env_info = env_info
-        self.auv_comm_msgs = auv_comm_msgs
-        self.auv_trajectory = []
-    
-    def astar_plan(self):
-        A_star_planner = astar(self.env_info, self.auv_comm_msgs)
-        auv_trajectory = A_star_planner.astar()
-        return auv_trajectory
 
-    def rrt_plan(self):
-        rrt_planner = RRT(self.env_info, self.auv_comm_msgs)
-        auv_trajectory = rrt_planner.rrt()
-        return auv_trajectory
-    
-    def MotionPlanner(self):
-        if self.planner_type == "astar":
-            self.auv_trajectory = self.astar_plan()
-        elif self.planner_type == "rrt":
-            self.auv_trajectory = self.rrt_plan()
+    def plan_trajectory(self, auv_comm_msgs):
+        
+        """
+        Return the trajectory planned by the specified planner
+
+        Parameter:
+            auv_comm_msgs - Python list of dictionaries, representing the information sent by other auvs
+        """
+        return self.motion_planner.plan_trajectory(auv_comm_msgs)
 
 
