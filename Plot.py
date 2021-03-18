@@ -248,6 +248,7 @@ class Plot2D:
     
 
 def main():
+    # TODO: to be removed
     plot = Plot2D(shark_id_list=[5,7])
 
     auv_pos_list = [[[0], [0]]]

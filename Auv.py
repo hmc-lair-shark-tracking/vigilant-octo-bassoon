@@ -1,5 +1,5 @@
 from ParticleFilter import ParticleFilter
-from MotionPlanner import MotionPlanner
+from motionPlanners.MotionPlanner import MotionPlanner
 import math
 import numpy as np
 
@@ -145,7 +145,7 @@ class Auv:
 
     def find_waypoint_to_track(self, auv_trajectory, new_trajectory, curr_time):
         """
-        Return an Motion_plan_state object representing the trajectory point TRAJ_LOOK_AHEAD_TIME sec ahead
+        Return an MotionPlanState object representing the trajectory point TRAJ_LOOK_AHEAD_TIME sec ahead
         of current time
 
         Parameters: 
@@ -155,7 +155,7 @@ class Auv:
             curr_time - time in second, the current time in worldSim
             
         Return:
-            a Motion_plan_state object, which represents the waypoint to track
+            a MotionPlanState object, which represents the waypoint to track
         """
         # reset the trajectory index if it's a new trajectory
         if new_trajectory == True:
@@ -218,11 +218,32 @@ class Auv:
 
 class MotionPlanState:
     # class for motion planning
-    def __init__(self, x, y, z, theta=0, v=0, w=0):
+    def __init__(self, x, y, z=0, theta=0, v=0, w=0, size=0):
         self.x = x
         self.y = y
         self.z = z
         self.theta = theta
         self.v = v  # linear velocity
         self.w = w  # angular velocity
+        self.size = size
+
+
+def main():
+    env_info = {
+        "obstacles": [MotionPlanState(757,243, size=2), MotionPlanState(763,226, size=5)],
+        "boundary": [MotionPlanState(-500, -500), MotionPlanState(500,500)],
+        "habitats": [MotionPlanState(63,23, size=5), MotionPlanState(12,45,size=7), 
+                    MotionPlanState(51,36,size=5), MotionPlanState(45,82,size=5),
+                    MotionPlanState(60,65,size=10), MotionPlanState(80,79,size=5),
+                    MotionPlanState(85,25,size=6)]
+    }
+
+    # TODO: to be removed
+    a = Auv(10, -10, 0, 0, 2, np.pi/4, ["astar"], env_info)
+
+
+if __name__ == "__main__":
+    main()
+
+
         

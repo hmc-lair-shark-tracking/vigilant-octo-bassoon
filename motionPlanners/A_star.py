@@ -8,16 +8,6 @@ import numpy as np
 from shapely.wkt import loads as load_wkt
 from shapely.geometry import Polygon
 
-class MotionPlanState:
-    # TODO: currently using for debugging, remove 
-    # class for motion planning
-    def __init__(self, x, y, z=0, theta=0, v=0, w=0):
-        self.x = x
-        self.y = y
-        self.z = z
-        self.theta = theta
-        self.v = v  # linear velocity
-        self.w = w  # angular velocity
 
 class Node:
     def __init__(self, time_step, dist_traveled, parent=None, position=None):
@@ -39,7 +29,7 @@ class Node:
         self.time_step = time_step
         self.dist_traveled = dist_traveled
 
-class astar:
+class Astar:
     def __init__(self, env_info):
         """
         Initialize an astar class
@@ -248,3 +238,14 @@ class astar:
                 if child.position not in self.visited_nodes:
                     open_list.append(child)
                     self.visited_nodes.append(child)
+
+class MotionPlanState:
+    # TODO: currently using for debugging, remove 
+    # class for motion planning
+    def __init__(self, x, y, z=0, theta=0, v=0, w=0):
+        self.x = x
+        self.y = y
+        self.z = z
+        self.theta = theta
+        self.v = v  # linear velocity
+        self.w = w  # angular velocity
