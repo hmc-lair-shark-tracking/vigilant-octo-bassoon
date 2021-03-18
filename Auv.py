@@ -216,16 +216,43 @@ class Auv:
         return msg
                
 
+
 class MotionPlanState:
-    # class for motion planning
-    def __init__(self, x, y, z=0, theta=0, v=0, w=0, size=0):
+    def __init__(self, x, y, z=0, theta=0, v=0, w=0, traj_time_stamp=0, plan_time_stamp=0, size=0):
+        """
+        Initialilze a class to hold all the necessary information needed for motion planning
+
+        Used in: 
+            Auv.py
+            WorldSim.py
+            motionPlanners/A_star.py
+            motionPlanners/RRT.py
+        """
         self.x = x
         self.y = y
         self.z = z
         self.theta = theta
+
         self.v = v  # linear velocity
         self.w = w  # angular velocity
+
+        self.traj_time_stamp = traj_time_stamp
+        self.plan_time_stamp = plan_time_stamp
+
         self.size = size
+
+        self.parent = None
+        self.path = []
+        self.length = 0
+        self.cost = []
+
+    def __repr__(self):
+        return "MPS: [x=" + str(self.x) + ", y="  + str(self.y) + ", z=" + str(self.z) +\
+                ", theta=" + str(self.theta)  + ", v=" + str(self.v) + ", w=" + str(self.w) + ", size=" + str(self.size) +\
+                ", traj_time=" + str(self.traj_time_stamp) +  ", plan_time="+  str(self.plan_time_stamp) + "]"
+
+    def __str__(self):
+        return self.__repr__()
 
 
 def main():
@@ -244,6 +271,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-        

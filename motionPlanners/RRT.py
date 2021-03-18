@@ -5,16 +5,6 @@ import csv
 import numpy as np
 from shapely.geometry import Polygon, Point
 
-class MotionPlanState:
-    # TODO: currently using for debugging, remove 
-    # class for motion planning
-    def __init__(self, x, y, z=0, theta=0, v=0, w=0):
-        self.x = x
-        self.y = y
-        self.z = z
-        self.theta = theta
-        self.v = v  # linear velocity
-        self.w = w  # angular velocity
 
 class RRT:
     def __init__(self, env_info):
@@ -136,7 +126,7 @@ class RRT:
 
     def steer(self, mps, dist_to_end, diff_max, freq, min_dist, velocity=1, traj_time_stamp=False):
         #dubins library
-        '''new_mps = Motion_plan_state(from_mps.x, from_mps.y, theta = from_mps.theta)
+        '''new_mps = MotionPlanState(from_mps.x, from_mps.y, theta = from_mps.theta)
         new_mps.path = []
         q0 = (from_mps.x, from_mps.y, from_mps.theta)
         q1 = (to_mps.x, to_mps.y, to_mps.theta)
@@ -144,7 +134,7 @@ class RRT:
         path = dubins.shortest_path(q0, q1, turning_radius)
         configurations, _ = path.sample_many(exp_rate)
         for configuration in configurations:
-            new_mps.path.append(Motion_plan_state(x = configuration[0], y = configuration[1], theta = configuration[2]))
+            new_mps.path.append(MotionPlanState(x = configuration[0], y = configuration[1], theta = configuration[2]))
         new_mps.path.append(to_mps)
         dubins_path = new_mps.path
         new_mps = dubins_path[-2]
@@ -258,8 +248,8 @@ class RRT:
                 self.time_bin[bin_interval * i] = []
             self.time_bin[bin_interval].append(start)
         while time.time()<t_end:
-            #find the closest motion_plan_state by generating a random time stamp and 
-            #find the motion_plan_state whose time stamp is closest to it
+            #find the closest MotionPlanState by generating a random time stamp and 
+            #find the MotionPlanState whose time stamp is closest to it
             if plan_time:
                 if traj_time_stamp:
                     ran_bin = int(random.uniform(1, time_expand + 1))
@@ -272,8 +262,8 @@ class RRT:
                     closest_mps = self.get_closest_mps_time(ran_time, self.mps_list)
                     if closest_mps.traj_time_stamp > max_traj_time:
                         continue
-            #find the closest motion_plan_state by generating a random motion_plan_state
-            #and find the motion_plan_state with smallest distance
+            #find the closest MotionPlanState by generating a random MotionPlanState
+            #and find the MotionPlanState with smallest distance
             else:
                 ran_mps = self.get_random_mps()
                 closest_mps = self.get_closest_mps(ran_mps, self.mps_list)
@@ -300,4 +290,42 @@ class RRT:
                 return path
         
         return None  # cannot find path
-    
+
+
+class MotionPlanState:
+    def __init__(self, x, y, z=0, theta=0, v=0, w=0, traj_time_stamp=0, plan_time_stamp=0, size=0):
+        """
+        Initialilze a class to hold all the necessary information needed for motion planning
+
+        Used in: 
+            Auv.py
+            WorldSim.py
+            motionPlanners/A_star.py
+            motionPlanners/RRT.py
+        """
+        self.x = x
+        self.y = y
+        self.z = z
+        self.theta = theta
+
+        self.v = v  # linear velocity
+        self.w = w  # angular velocity
+
+        self.traj_time_stamp = traj_time_stamp
+        self.plan_time_stamp = plan_time_stamp
+
+        self.size = size
+
+        self.parent = None
+        self.path = []
+        self.length = 0
+        self.cost = []
+
+    def __repr__(self):
+        return "MPS: [x=" + str(self.x) + ", y="  + str(self.y) + ", z=" + str(self.z) +\
+                ", theta=" + str(self.theta)  + ", v=" + str(self.v) + ", w=" + str(self.w) + ", size=" + str(self.size) +\
+                ", traj_time=" + str(self.traj_time_stamp) +  ", plan_time="+  str(self.plan_time_stamp) + "]"
+
+    def __str__(self):
+        return self.__repr__()
+

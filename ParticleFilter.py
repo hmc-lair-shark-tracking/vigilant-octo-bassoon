@@ -68,7 +68,7 @@ class ParticleFilter:
         Called by the AUV class
 
         Parameters: 
-            auv_state - a Motion_planning_state object, mainly using the auv's theta
+            auv_state - a MotionPlanState object, mainly using the auv's theta
             shark_state_list - Python list of lists, each element is the measurement for a shark, 
                 each element's format: [x_shark, y_shark, z_shark_range, z_shark_bearing, shark_id]
             delta_t - the amount of time the particles are "moving" 
@@ -99,7 +99,7 @@ class ParticleFilter:
             3. create a new sets of particles based on the weights
 
         Parameters: 
-            auv_state - a Motion_planning_state object, mainly using the auv's theta
+            auv_state - a MotionPlanState object, mainly using the auv's theta
             shark_state_list - Python list of lists, each element is the measurement for a shark, 
                 each element's format: [x_shark, y_shark, z_shark_range, z_shark_bearing, shark_id]
         """
@@ -344,7 +344,7 @@ class Particle:
         The two results are multiplied together to get the final weight
 
         Parameter:
-            auv_state - a Motion_planning_state object, mainly using the auv's theta
+            auv_state - a MotionPlanState object, mainly using the auv's theta
             shark_state - a python list representing a shark's measurement
                 of format: [x_shark, y_shark, z_shark_range, z_shark_bearing, shark_id]
 

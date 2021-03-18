@@ -17,7 +17,7 @@ import time
 import catalina
 
 # Imports for sharkTrajectory.py and sharkOccupancyGrid.py
-from motion_plan_state import Motion_plan_state
+
 
 
 ########################################################################
@@ -81,7 +81,7 @@ class SharkTrajectory:
             # the shark tracking video has frame rate 30 fps
             # which means that the time interval will be 1/30, or about 0.03
             self.traj_pts_array.append(\
-                Motion_plan_state(x = float(x_pos_array[i]), y = float(y_pos_array[i]), traj_time_stamp = i * 0.03))
+                MotionPlanState(x = float(x_pos_array[i]), y = float(y_pos_array[i]), traj_time_stamp = i * 0.03))
 
 
     def store_positions(self, x, y, z): 
@@ -148,7 +148,7 @@ class SharkOccupancyGrid:
         '''
         convert a dictionary of shark trajectories
             key: shark ID, int
-            value: shark trajectory, a list of Motion_plan_state
+            value: shark trajectory, a list of MotionPlanState
         
         output: 
         sharkOccupancy:
@@ -282,7 +282,7 @@ class SharkOccupancyGrid:
             occupancy of all cells should sum up to 1, assuming the shark is always in the boundary of the work space
         
         parameter:
-            traj: single shark trajectory, a list of motion_plan_state
+            traj: single shark trajectory, a list of MotionPlanState
 
         output:
             an occupancy grid representing the occupancy of this shark at each cell during the time bin
@@ -333,7 +333,7 @@ class SharkOccupancyGrid:
         '''
         convert a dictionary of shark trajectories
             key: shark ID, int
-            value: shark trajectory, a list of Motion_plan_state
+            value: shark trajectory, a list of MotionPlanState
         
         output: a dictionary of shark trajectories
             key: timebin, tuple(start time, end time)
@@ -455,25 +455,61 @@ def splitCell(polygon, cell_size):
     return result
         
 
+class MotionPlanState:
+    def __init__(self, x, y, z=0, theta=0, v=0, w=0, traj_time_stamp=0, plan_time_stamp=0, size=0):
+        """
+        Initialilze a class to hold all the necessary information needed for motion planning
+
+        Used in: 
+            Auv.py
+            WorldSim.py
+            motionPlanners/A_star.py
+            motionPlanners/RRT.py
+        """
+        self.x = x
+        self.y = y
+        self.z = z
+        self.theta = theta
+
+        self.v = v  # linear velocity
+        self.w = w  # angular velocity
+
+        self.traj_time_stamp = traj_time_stamp
+        self.plan_time_stamp = plan_time_stamp
+
+        self.size = size
+
+        self.parent = None
+        self.path = []
+        self.length = 0
+        self.cost = []
+
+    def __repr__(self):
+        return "MPS: [x=" + str(self.x) + ", y="  + str(self.y) + ", z=" + str(self.z) +\
+                ", theta=" + str(self.theta)  + ", v=" + str(self.v) + ", w=" + str(self.w) + ", size=" + str(self.size) +\
+                ", traj_time=" + str(self.traj_time_stamp) +  ", plan_time="+  str(self.plan_time_stamp) + "]"
+
+    def __str__(self):
+        return self.__repr__()
 
 # boundary_poly = []
 # for b in catalina.BOUNDARIES:
 #     pos = catalina.create_cartesian((b.x, b.y), catalina.ORIGIN_BOUND)
 #     boundary_poly.append((pos[0],pos[1]))
 # boundary_poly = Polygon(boundary_poly)
-# shark_dict = {1: [Motion_plan_state(-120 + (0.3 * i), -60 + (0.3 * i), traj_time_stamp=i) for i in range(1,201)], 
-#     2: [Motion_plan_state(-65 - (0.3 * i), -50 + (0.3 * i), traj_time_stamp=i) for i in range(1,201)],
-#     3: [Motion_plan_state(-110 + (0.3 * i), -40 - (0.3 * i), traj_time_stamp=i) for i in range(1,201)], 
-#     4: [Motion_plan_state(-105 - (0.3 * i), -55 + (0.3 * i), traj_time_stamp=i) for i in range(1,201)],
-#     5: [Motion_plan_state(-120 + (0.3 * i), -50 - (0.3 * i), traj_time_stamp=i) for i in range(1,201)], 
-#     6: [Motion_plan_state(-85 - (0.3 * i), -55 + (0.3 * i), traj_time_stamp=i) for i in range(1,201)],
-#     7: [Motion_plan_state(-270 + (0.3 * i), 50 + (0.3 * i), traj_time_stamp=i) for i in range(1,201)], 
-#     8: [Motion_plan_state(-250 - (0.3 * i), 75 + (0.3 * i), traj_time_stamp=i) for i in range(1,201)],
-#     9: [Motion_plan_state(-260 - (0.3 * i), 75 + (0.3 * i), traj_time_stamp=i) for i in range(1,201)], 
-#     10: [Motion_plan_state(-275 + (0.3 * i), 80 - (0.3 * i), traj_time_stamp=i) for i in range(1,201)]}
+# shark_dict = {1: [MotionPlanState(-120 + (0.3 * i), -60 + (0.3 * i), traj_time_stamp=i) for i in range(1,201)], 
+#     2: [MotionPlanState(-65 - (0.3 * i), -50 + (0.3 * i), traj_time_stamp=i) for i in range(1,201)],
+#     3: [MotionPlanState(-110 + (0.3 * i), -40 - (0.3 * i), traj_time_stamp=i) for i in range(1,201)], 
+#     4: [MotionPlanState(-105 - (0.3 * i), -55 + (0.3 * i), traj_time_stamp=i) for i in range(1,201)],
+#     5: [MotionPlanState(-120 + (0.3 * i), -50 - (0.3 * i), traj_time_stamp=i) for i in range(1,201)], 
+#     6: [MotionPlanState(-85 - (0.3 * i), -55 + (0.3 * i), traj_time_stamp=i) for i in range(1,201)],
+#     7: [MotionPlanState(-270 + (0.3 * i), 50 + (0.3 * i), traj_time_stamp=i) for i in range(1,201)], 
+#     8: [MotionPlanState(-250 - (0.3 * i), 75 + (0.3 * i), traj_time_stamp=i) for i in range(1,201)],
+#     9: [MotionPlanState(-260 - (0.3 * i), 75 + (0.3 * i), traj_time_stamp=i) for i in range(1,201)], 
+#     10: [MotionPlanState(-275 + (0.3 * i), 80 - (0.3 * i), traj_time_stamp=i) for i in range(1,201)]}
 # testing = SharkOccupancyGrid(shark_dict, 10, boundary_poly, 50, 50)
 # boundary_poly = box(0.0, 0.0, 10.0, 10.0)
-# shark_dict = {1: [Motion_plan_state(0 + (0.1 * i), 2 + (0.1 * i), traj_time_stamp=0.1*i) for i in range(1,51)]}
+# shark_dict = {1: [MotionPlanState(0 + (0.1 * i), 2 + (0.1 * i), traj_time_stamp=0.1*i) for i in range(1,51)]}
 # testing = SharkOccupancyGrid(shark_dict, 2, boundary_poly, 2, 4)
 # occGrid = testing.constructSharkOccupancyGrid(shark_dict[5])
 # auvGrid = testing.constructAUVGrid(occGrid)

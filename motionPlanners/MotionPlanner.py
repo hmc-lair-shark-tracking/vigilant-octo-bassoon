@@ -1,5 +1,5 @@
-from MotionPlanners.A_star import Astar
-from MotionPlanners.RRT import RRT
+from motionPlanners.A_star import Astar
+from motionPlanners.RRT import RRT
 
 class MotionPlanner:
     def __init__(self, planner_key_list, env_info):
