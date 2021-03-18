@@ -8,16 +8,6 @@ import numpy as np
 from shapely.wkt import loads as load_wkt
 from shapely.geometry import Polygon
 
-class MotionPlanState:
-    # TODO: currently using for debugging, remove 
-    # class for motion planning
-    def __init__(self, x, y, z=0, theta=0, v=0, w=0):
-        self.x = x
-        self.y = y
-        self.z = z
-        self.theta = theta
-        self.v = v  # linear velocity
-        self.w = w  # angular velocity
 
 class Node:
     def __init__(self, time_step, dist_traveled, parent=None, position=None):
@@ -39,7 +29,7 @@ class Node:
         self.time_step = time_step
         self.dist_traveled = dist_traveled
 
-class astar:
+class Astar:
     def __init__(self, env_info):
         """
         Initialize an astar class
@@ -109,7 +99,7 @@ class astar:
         Check if the input position is within the boundary defined by the boundary_list
 
         Paramters: 
-            boundary_list -- a list of Motion_plan_state objects that define the corners of the ROI
+            boundary_list -- a list of MotionPlanState objects that define the corners of the ROI
             position -- a position tuple (x, y) 
 
         Returns:
@@ -157,8 +147,8 @@ class astar:
 
         Parameter:
             current_node: a Node object 
-            habitat_open_list: a list of Motion_plan_state objects
-            habitat_closed_list: a list of Motion_plan_state objects
+            habitat_open_list: a list of MotionPlanState objects
+            habitat_closed_list: a list of MotionPlanState objects
         """
         for index, item in enumerate(habitat_unexplored):
             dist = math.sqrt((current_node.position[0]-item.x) **2 + (current_node.position[1]-item.y) **2)
@@ -248,3 +238,41 @@ class astar:
                 if child.position not in self.visited_nodes:
                     open_list.append(child)
                     self.visited_nodes.append(child)
+
+
+class MotionPlanState:
+    def __init__(self, x, y, z=0, theta=0, v=0, w=0, traj_time_stamp=0, plan_time_stamp=0, size=0):
+        """
+        Initialilze a class to hold all the necessary information needed for motion planning
+
+        Used in: 
+            Auv.py
+            WorldSim.py
+            motionPlanners/A_star.py
+            motionPlanners/RRT.py
+        """
+        self.x = x
+        self.y = y
+        self.z = z
+        self.theta = theta
+
+        self.v = v  # linear velocity
+        self.w = w  # angular velocity
+
+        self.traj_time_stamp = traj_time_stamp
+        self.plan_time_stamp = plan_time_stamp
+
+        self.size = size
+
+        self.parent = None
+        self.path = []
+        self.length = 0
+        self.cost = []
+
+    def __repr__(self):
+        return "MPS: [x=" + str(self.x) + ", y="  + str(self.y) + ", z=" + str(self.z) +\
+                ", theta=" + str(self.theta)  + ", v=" + str(self.v) + ", w=" + str(self.w) + ", size=" + str(self.size) +\
+                ", traj_time=" + str(self.traj_time_stamp) +  ", plan_time="+  str(self.plan_time_stamp) + "]"
+
+    def __str__(self):
+        return self.__repr__()

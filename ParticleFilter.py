@@ -36,7 +36,7 @@ def velocity_wrap(velocity):
     
 
 class ParticleFilter:
-    def __init__(self, init_auv_state):
+    def __init__(self):
         """
         Initialize a ParticleFilter class given the initial shark position
 
@@ -46,7 +46,6 @@ class ParticleFilter:
             number_of_particles - optional (default set to 150), the total number of particles in the Particle_Filter class
             initial_particle_range - the side length of square that the random particles are in
         """
-        self.auv_state = auv_state
         self.particles_list = []
 
 
@@ -69,7 +68,7 @@ class ParticleFilter:
         Called by the AUV class
 
         Parameters: 
-            auv_state - a Motion_planning_state object, mainly using the auv's theta
+            auv_state - a MotionPlanState object, mainly using the auv's theta
             shark_state_list - Python list of lists, each element is the measurement for a shark, 
                 each element's format: [x_shark, y_shark, z_shark_range, z_shark_bearing, shark_id]
             delta_t - the amount of time the particles are "moving" 
@@ -100,7 +99,7 @@ class ParticleFilter:
             3. create a new sets of particles based on the weights
 
         Parameters: 
-            auv_state - a Motion_planning_state object, mainly using the auv's theta
+            auv_state - a MotionPlanState object, mainly using the auv's theta
             shark_state_list - Python list of lists, each element is the measurement for a shark, 
                 each element's format: [x_shark, y_shark, z_shark_range, z_shark_bearing, shark_id]
         """
@@ -174,7 +173,7 @@ class ParticleFilter:
         COPY_NUM_LESS_THAN_1 = 5  # weight <= 1.0
 
         new_particles_list = []
-        particles_num = len(self.particles_list):
+        particles_num = len(self.particles_list)
 
         for particle in self.particles_list:
             if particle.weight_p < 0.2:
@@ -216,7 +215,7 @@ class ParticleFilter:
         return [float(particle_x_sum) / particle_nums, float(particle_y_sum) / particle_nums]
 
 
-    def particle_mean_error(self, estimated_pos, shark_state_list)
+    def particle_mean_error(self, estimated_pos, shark_state_list):
         """
         Parameter: 
             estimated_pos - Python list, [x_estimated_shark, y_estimated_shark]
@@ -322,7 +321,7 @@ class Particle:
         Return:
             the alpha value of a particle based on the auv position
         """
-       return angle_wrap(math.atan2((-y_shark + self.y_p), (self.x_p + -x_shark)) - theta_auv)
+        return angle_wrap(math.atan2((-y_shark + self.y_p), (self.x_p + -x_shark)) - theta_auv)
 
 
     def calc_particle_range(self, x_shark, y_shark):
@@ -345,7 +344,7 @@ class Particle:
         The two results are multiplied together to get the final weight
 
         Parameter:
-            auv_state - a Motion_planning_state object, mainly using the auv's theta
+            auv_state - a MotionPlanState object, mainly using the auv's theta
             shark_state - a python list representing a shark's measurement
                 of format: [x_shark, y_shark, z_shark_range, z_shark_bearing, shark_id]
 

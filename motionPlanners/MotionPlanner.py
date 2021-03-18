@@ -1,5 +1,5 @@
-from RRT import RRT
-from A_star import astar
+from motionPlanners.A_star import Astar
+from motionPlanners.RRT import RRT
 
 class MotionPlanner:
     def __init__(self, planner_key_list, env_info):
@@ -13,7 +13,7 @@ class MotionPlanner:
                 (e.g. boundary, obstacles, habitats)
         """
         if planner_key_list[0] == "astar":
-            self.motion_planner = astar(env_info)
+            self.motion_planner = Astar(env_info)
         elif planner_key_list[0] == "rrt":
             self.motion_planner == RRT(env_info)
         self.env_info = env_info

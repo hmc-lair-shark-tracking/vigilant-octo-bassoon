@@ -141,7 +141,7 @@ class Plot2D:
 
         Parameters:
             planner_name - string, either "A *" or "RRT"
-            trajectory_list - an list of Motion_plan_state objects
+            trajectory_list - an list of MotionPlanState objects
         """
         # get the checkbox object
         checkbox = self.traj_checkbox_dict[planner_name][1]
@@ -246,62 +246,3 @@ class Plot2D:
         for shark_id in shark_id_list:
             self.labels += ["shark #" + str(shark_id)]
     
-
-def main():
-    plot = Plot2D(shark_id_list=[5,7])
-
-    auv_pos_list = [[[0], [0]]]
-
-
-    shark_pos_list = [
-        [[3], [3], 5],
-        [[-1], [-1], 7]
-    ]
-
-    trajectory_list = [
-        ["RRT", [MotionPlanState(x + 1, x-1) for x in range(4, 20)]],
-        ["A *", [MotionPlanState(x - 2, x-2) for x in range(-4, 14)]]
-    ]
-
-    particle_list = []
-    obstacles_list = []
-
-    for _ in range(1000):
-        plot.plot_world(auv_pos_list, shark_pos_list, trajectory_list, particle_list, obstacles_list)
-
-        auv_x, auv_y = auv_pos_list[0]
-
-        auv_x += [auv_x[-1] + 2 * np.random.rand()]
-        auv_y += [auv_y[-1] + 2 * np.random.rand()]
-
-        auv_pos_list = [[auv_x, auv_y]]
-
-        new_shark_pos_list = []
-        for shark in shark_pos_list:
-            shark_x, shark_y, shark_id = shark
-
-            shark_x += [shark_x[-1] + 1 * np.random.rand()]
-            shark_y += [shark_y[-1] + 1 * np.random.rand()]
-            
-            new_shark_pos_list += [[shark_x, shark_y, shark_id]]
-
-        shark_pos_list = new_shark_pos_list
-
-
-class MotionPlanState:
-    # TODO: currently using for debugging, remove 
-    # class for motion planning
-    def __init__(self, x, y, z=0, theta=0, v=0, w=0):
-        self.x = x
-        self.y = y
-        self.z = z
-        self.theta = theta
-        self.v = v  # linear velocity
-        self.w = w  # angular velocity
-
-
-if __name__ == "__main__":
-    main()
-
-
-        

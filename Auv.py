@@ -1,5 +1,5 @@
 from ParticleFilter import ParticleFilter
-from MotionPlanner import MotionPlanner
+from motionPlanners.MotionPlanner import MotionPlanner
 import math
 import numpy as np
 
@@ -145,7 +145,7 @@ class Auv:
 
     def find_waypoint_to_track(self, auv_trajectory, new_trajectory, curr_time):
         """
-        Return an Motion_plan_state object representing the trajectory point TRAJ_LOOK_AHEAD_TIME sec ahead
+        Return an MotionPlanState object representing the trajectory point TRAJ_LOOK_AHEAD_TIME sec ahead
         of current time
 
         Parameters: 
@@ -155,7 +155,7 @@ class Auv:
             curr_time - time in second, the current time in worldSim
             
         Return:
-            a Motion_plan_state object, which represents the waypoint to track
+            a MotionPlanState object, which represents the waypoint to track
         """
         # reset the trajectory index if it's a new trajectory
         if new_trajectory == True:
@@ -216,13 +216,58 @@ class Auv:
         return msg
                
 
+
 class MotionPlanState:
-    # class for motion planning
-    def __init__(self, x, y, z, theta=0, v=0, w=0):
+    def __init__(self, x, y, z=0, theta=0, v=0, w=0, traj_time_stamp=0, plan_time_stamp=0, size=0):
+        """
+        Initialilze a class to hold all the necessary information needed for motion planning
+
+        Used in: 
+            Auv.py
+            WorldSim.py
+            motionPlanners/A_star.py
+            motionPlanners/RRT.py
+        """
         self.x = x
         self.y = y
         self.z = z
         self.theta = theta
+
         self.v = v  # linear velocity
         self.w = w  # angular velocity
-        
+
+        self.traj_time_stamp = traj_time_stamp
+        self.plan_time_stamp = plan_time_stamp
+
+        self.size = size
+
+        self.parent = None
+        self.path = []
+        self.length = 0
+        self.cost = []
+
+    def __repr__(self):
+        return "MPS: [x=" + str(self.x) + ", y="  + str(self.y) + ", z=" + str(self.z) +\
+                ", theta=" + str(self.theta)  + ", v=" + str(self.v) + ", w=" + str(self.w) + ", size=" + str(self.size) +\
+                ", traj_time=" + str(self.traj_time_stamp) +  ", plan_time="+  str(self.plan_time_stamp) + "]"
+
+    def __str__(self):
+        return self.__repr__()
+
+
+def main():
+    env_info = {
+        "obstacles": [MotionPlanState(757,243, size=2), MotionPlanState(763,226, size=5)],
+        "boundary": [MotionPlanState(-500, -500), MotionPlanState(500,500)],
+        "habitats": [MotionPlanState(63,23, size=5), MotionPlanState(12,45,size=7), 
+                    MotionPlanState(51,36,size=5), MotionPlanState(45,82,size=5),
+                    MotionPlanState(60,65,size=10), MotionPlanState(80,79,size=5),
+                    MotionPlanState(85,25,size=6)]
+    }
+
+    # TODO: to be removed
+    a = Auv(10, -10, 0, 0, 2, np.pi/4, ["astar"], env_info)
+
+
+if __name__ == "__main__":
+    main()
